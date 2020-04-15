@@ -1,0 +1,14 @@
+migration-file ::= (<whitespace> | <comment> | migration-entry)*
+
+migration-entry ::= migration-header migration-body
+migration-header ::= <comment-indicator> <';;'> <whitespace>* migration-direction <new-line>
+migration-direction ::= ('up' | 'down')
+
+migration-body ::= sql (sql)*
+
+whitespace ::= <space> | <comment> | <new-line>
+space ::= ' ' | '\t'
+new-line ::= <('\n' | '\r\n')+>
+comment ::= comment-indicator !';;' #"[^\n]*"
+sql ::= !'--' #".*" <new-line>?
+comment-indicator ::= <'--'>

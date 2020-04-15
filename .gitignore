@@ -1,0 +1,33 @@
+
+*.class
+*.jar
+.cpcache/
+.hg/
+.hgignore
+.lein-deps-sum
+.lein-failures
+.lein-plugins/
+.lein-repl-history
+.nrepl-port
+/.lein-*
+/.nrepl-port
+/checkouts
+/checkouts/
+/classes
+/classes/
+/lib/
+/target
+/target/
+pom.xml
+pom.xml.asc
+profiles.clj
+
+
+# IntelliJ
+# User-specific stuff
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.DS_Store

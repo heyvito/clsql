@@ -1,0 +1,27 @@
+queries-file ::= (<whitespace> | <comment> | query-entry)*
+
+query-entry ::= query-header query-body
+query-header ::= <comment-indicator> <space>* <greather-than> <space>* query-name <new-line>
+                 (modifiers <new-line>)?
+                 (docstring <new-line>?)*
+modifiers ::= <comment-indicator> (modifier <space>?)*
+<modifier> ::= <'@'> name
+docstring ::= <comment-indicator> <space>* !space #"[^\n]*"
+query-name ::= name
+
+query-body ::= (<whitespace>* sql)*
+
+comment ::= comment-indicator !greather-than #"[^\n]*"
+<name> ::= symbol-head symbol-rest*
+
+<sql> ::= (placeholder | token)*
+token ::= !':' #"[^\n:]*"
+placeholder ::= <':'> name
+
+greather-than ::= '>'
+whitespace ::= <space> | <comment> | <new-line>
+space ::= ' ' | '\t'
+new-line ::= <('\n' | '\r\n')+>
+comment-indicator ::= <'--'>
+<symbol-head> ::= #"[A-Za-z\*\+\!\-\_\?><=$]+"
+<symbol-rest> ::= <symbol-head> | #"[0-9]*"
