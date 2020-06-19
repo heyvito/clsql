@@ -1,6 +1,6 @@
 (defproject clsql "0.1.0"
   :description "clsql provides a small abstraction for handling SQL and migrations"
-  :url "https://github.com/victorgama/clsql"
+  :url "https://github.com/heyvito/clsql"
   :license {:name "MIT"}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/java.jdbc "0.7.11"]

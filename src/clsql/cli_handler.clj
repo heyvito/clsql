@@ -6,7 +6,7 @@
   {:source  :clsql
    :command command
    :error   error
-   :details "https://github.com/victorgama/clsql/wiki/errors"})
+   :details "https://github.com/heyvito/clsql/wiki/errors"})
 
 (defn- create-migration-missing-name []
   (throw (ex-info "clsql: Cannot create migration: Missing migration name"

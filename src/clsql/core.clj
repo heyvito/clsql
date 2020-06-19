@@ -37,7 +37,7 @@
   (or (detect-database-config)
       (throw (ex-info "clsql: Can't find database configuration"
                       {:error   "No database configuration"
-                       :details "https://github.com/victorgama/clsql/wiki/errors"}))))
+                       :details "https://github.com/heyvito/clsql/wiki/errors"}))))
 
 (defn- read-queries [name]
   (let [final-name (str name

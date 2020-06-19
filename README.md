@@ -1,5 +1,5 @@
 # clsql
-![](https://github.com/victorgama/clsql/workflows/Test/badge.svg)
+![](https://github.com/heyvito/clsql/workflows/Test/badge.svg)
 [![cljdoc badge](https://cljdoc.org/badge/clsql/clsql)](https://cljdoc.org/d/clsql/clsql/CURRENT)
 [![Clojars Project](https://img.shields.io/clojars/v/clsql.svg)](https://clojars.org/clsql)
 
