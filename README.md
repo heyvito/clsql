@@ -24,7 +24,7 @@ side-project to train my (quite) rusty (E)BNF habilities.
 Add the following dependency to your `project.clj` file:
 
 ```clojure
-[clsql "0.1.0"]
+[clsql "0.1.1"]
 ```
 
 ### Dependencies
