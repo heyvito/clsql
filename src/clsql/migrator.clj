@@ -70,6 +70,20 @@
          (vec)
          (sort-by :version))))
 
+(def splitter (re-pattern #"\s*;\s*(?=([^']*'[^']*')*[^']*$)"))
+(defn- split-commands [cmd]
+  (if (re-find splitter cmd)
+    (loop [matcher (re-matcher splitter cmd)
+           from 0
+           statements []]
+      (if (.find matcher)
+        (let [to (.start matcher)
+              new-statements (conj statements
+                                   (subs cmd from to))]
+          (recur matcher (inc to) new-statements))
+        (map str/trim statements)))
+    [cmd]))
+
 (defn- migrate-and-record [tx mig direction]
   (println (if (= :up direction) "Executing" "Rolling-back") "migration" (:name mig))
   (let [m (migration/parse-migration (:path mig))
@@ -78,7 +92,7 @@
     (println "----------- 8< -----------\n\n"
              cmd
              "\n\n----------- 8< -----------\n\n")
-    (sql/db-do-commands tx [cmd])
+    (sql/db-do-commands tx (split-commands cmd))
     (case direction
       :up (sql/insert! tx
                        "schema_migrations"
@@ -121,7 +135,6 @@
                              (apply str (interpose \, missing)))
                         {:missing-migrations missing})))
       (when-let [definitions (map #(migration-by-version local-migrations %) to-remove)]
-        (println definitions)
         (doseq [m definitions]
           (migrate-and-record tx m :down)))
       true)))

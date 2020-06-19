@@ -90,3 +90,13 @@
                                "│ 1579904871-test.sql             │ Down   │\n"
                                "╘═════════════════════════════════╧════════╛\n")]
           (is (= expectation result)))))))
+
+(deftest test-multiple-statements
+  (reset-database!)
+  (isolating-database
+    (get-migrations database-config)
+    (let [migration {:name    "test"
+                     :path    "./test/fixtures/migration-statements.sql"
+                     :version "27"}]
+      (migrate-and-record database-config migration :up)
+      (is ((get-migrations database-config) "27")))))
