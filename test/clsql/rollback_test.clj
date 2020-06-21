@@ -1,6 +1,5 @@
 (ns clsql.rollback-test
   (:require [clojure.test :refer :all]
-            [clojure.java.io :as io]
             [clsql.migrator :refer :all]
             [clsql.config :as config]
             [clsql.helpers :refer [delete-recursive

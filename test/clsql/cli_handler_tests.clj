@@ -1,8 +1,11 @@
 (ns clsql.cli-handler-tests
   (:require [clojure.test :refer :all]
-            [clsql.helpers :refer [execute-after
-                                   delete-recursive]]
-            [clsql.cli-handler :refer [handle-command-line-args]])
+            [clsql.helpers :refer [database-config
+                                   isolating-database
+                                   isolating-config
+                                   reset-database!]]
+            [clsql.cli-handler :refer [handle-command-line-args]]
+            [clsql.config :as config])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest test-pass-through
@@ -31,10 +34,10 @@
   (testing "with invalid args"
     (is (thrown? ExceptionInfo (handle-command-line-args ["db-rollback" "test"]))))
   (testing "with no args"
-    (with-redefs-fn {#'clsql.migrator/rollback (fn [{:keys [to]}] (is (nil? to)))}
+    (with-redefs-fn {#'clsql.migrator/rollback (fn [& {:keys [to]}] (is (nil? to)))}
       #(handle-command-line-args ["db-rollback"])))
   (testing "with valid arg"
-    (with-redefs-fn {#'clsql.migrator/rollback (fn [{:keys [to]}] (is (= "1290312" to)))}
+    (with-redefs-fn {#'clsql.migrator/rollback (fn [& {:keys [to]}] (is (= "1290312" to)))}
       #(handle-command-line-args ["db-rollback" "1290312"]))))
 
 (deftest test-migration-status
@@ -44,3 +47,15 @@
       (with-redefs-fn {#'clsql.migrator/migration-status mocked-fn}
         #(handle-command-line-args ["db-migration-status"]))
       (is @called))))
+
+(deftest test-real-rollback
+  (isolating-config
+    (reset! config/database-configuration database-config)
+    (reset-database!)
+    (isolating-database
+      (let [migration {:name    "test"
+                       :path    "./test/fixtures/migration-statements.sql"
+                       :version "27"}]
+        (with-redefs-fn {#'clsql.migrator/discover-migrations (fn [] [migration])}
+          #(do (handle-command-line-args ["db-migrate"])
+               (handle-command-line-args ["db-rollback"])))))))
