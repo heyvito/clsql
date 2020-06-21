@@ -89,9 +89,9 @@
   (let [m (migration/parse-migration (:path mig))
         version (:version mig)
         cmd (direction m)]
-    (println "----------- 8< -----------\n\n"
-             cmd
-             "\n\n----------- 8< -----------\n\n")
+    (println (str "----------- 8< -----------\n\n"
+           (str/trim cmd)
+           "\n\n----------- 8< -----------\n\n"))
     (sql/db-do-commands tx (split-commands cmd))
     (case direction
       :up (sql/insert! tx
