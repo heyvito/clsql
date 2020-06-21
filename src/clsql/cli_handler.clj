@@ -56,7 +56,7 @@
         "db-migrate" (migrator/migrate)
         "db-rollback" (let [[to] arguments]
                         (validate-rollback-argument! to)
-                        (migrator/rollback (if to {:to to} nil)))
+                        (migrator/rollback {:to to}))
         "db-migration-status" (migrator/migration-status)
         false)
       false)))

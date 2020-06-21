@@ -17,4 +17,7 @@ CREATE INDEX foos_kind ON foos (kind);
 --
 
 --;; down
-DROP TABLE users;
+DROP INDEX foos_message;
+DROP INDEX foos_kind;
+DROP TABLE foos;
+DROP TYPE SAMPLE_ENUM;

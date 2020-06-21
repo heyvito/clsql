@@ -82,3 +82,15 @@
       (is (= 3 (count (get-migrations database-config))))
       (rollback :to 0)
       (is (= 3 (count (get-migrations database-config)))))))
+
+(deftest test-multiple-statements
+  (reset-database!)
+  (isolating-database
+    (get-migrations database-config)
+    (let [migration {:name    "test"
+                     :path    "./test/fixtures/migration-statements.sql"
+                     :version "27"}]
+      (migrate-and-record database-config migration :up)
+      (is ((get-migrations database-config) "27"))
+      (migrate-and-record database-config migration :down)
+      (is (not ((get-migrations database-config) "27"))))))
