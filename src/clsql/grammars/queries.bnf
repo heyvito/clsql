@@ -9,7 +9,7 @@ modifiers ::= <comment-indicator> (modifier <space>?)*
 docstring ::= <comment-indicator> <space>* !space #"[^\n]*"
 query-name ::= name
 
-query-body ::= (<whitespace>* sql)*
+query-body ::= (<whitespace>? sql)*
 
 comment ::= comment-indicator !greather-than #"[^\n]*"
 <name> ::= symbol-head symbol-rest*
