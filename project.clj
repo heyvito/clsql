@@ -1,4 +1,4 @@
-(defproject clsql "0.1.4"
+(defproject clsql "0.1.5"
   :description "clsql provides a small abstraction for handling SQL and migrations"
   :url "https://github.com/heyvito/clsql"
   :license {:name "MIT"}
