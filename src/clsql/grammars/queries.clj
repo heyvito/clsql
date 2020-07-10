@@ -1,7 +1,8 @@
 (ns clsql.grammars.queries
   (:require [instaparse.core :as insta]
             [instaparse.transform :refer [transform]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clsql.errors :as errors]))
 
 (defmacro bnf-contents []
   (slurp (io/resource "clsql/grammars/queries.bnf")))
@@ -45,5 +46,6 @@
 
 (defn parse-queries [path]
   (->> (parser (slurp path))
+       (errors/parse-or-die path)
        (transform normalize-file)
        (normalize-entries)))

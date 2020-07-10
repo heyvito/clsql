@@ -2,7 +2,8 @@
   (:require [instaparse.core :as insta]
             [instaparse.transform :refer [transform]]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clsql.errors :as errors]))
 
 (defmacro bnf-contents []
   (slurp (io/resource "clsql/grammars/migration.bnf")))
@@ -37,6 +38,7 @@
 
 (defn parse-migration [path]
   (let [migration (->> (parser (slurp path))
+                       (errors/parse-or-die path)
                        (transform migration-normalizer))]
     {:up   ((find-command :up) migration)
      :down ((find-command :down) migration)}))
