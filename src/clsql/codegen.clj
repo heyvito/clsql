@@ -45,7 +45,7 @@
         (assoc :kind kind))))
 
 (defmacro make-validator [placeholders args]
-  (when placeholders
+  (when (seq placeholders)
     `(do
        (throw-if (and
                    (not (nil? ~args))
