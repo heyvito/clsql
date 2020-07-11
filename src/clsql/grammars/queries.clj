@@ -13,7 +13,10 @@
                      :query-header (fn [& i] {:header (vec i)})
                      :query-name   (fn [n] [:query-name (keyword n)])
                      :modifiers    (fn [& mod] [:modifiers (set (map keyword mod))])
-                     :placeholder  (fn [p] [:placeholder (keyword p)])
+                     :placeholder  (fn [p & cast] [:placeholder (keyword p)
+                                                   (when (seq cast)
+                                                     :cast (first cast))])
+                     :cast         (fn [sep val] (str sep val))
                      :query-entry  merge
                      :queries-file #(vec %&)})
 
