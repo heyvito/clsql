@@ -54,7 +54,7 @@
        (let [existing-keys# (set (keys ~args))
              missing-keys# (seq (remove existing-keys# ~placeholders))]
          (throw-if missing-keys#
-                   (apply str "Missing parameter(s): "
+                   (apply str "Missing arg(s): "
                           (interpose \, missing-keys#)))))))
 
 (defn- pick-query-method [kind returns?]
@@ -74,21 +74,49 @@
         {:keys [query params returns? kind]} (compose-query raw-body)
         query-method (pick-query-method kind returns?)]
     (when name
-      `(fn ~(symbol name) [db# args# & opts#]
-         (make-validator ~placeholders args#)
-         (let [ordered-opts# (map #(% args#) ~params)
-               jdbc-arguments# (cons ~query ordered-opts#)
-               result# ((var-get ~query-method) db# jdbc-arguments# opts#)]
-           (create-result-processor ~modifiers result#))))))
+      `(fn fn-name#
+         ([db#] (fn-name# db# {}))
+         ([db# args# & opts#]
+          (make-validator ~placeholders args#)
+          (let [ordered-opts# (map #(% args#) ~params)
+                jdbc-arguments# (cons ~query ordered-opts#)
+                result# ((var-get ~query-method) db# jdbc-arguments# opts#)]
+            (create-result-processor ~modifiers result#)))))))
+
+(defn- reformat-docstring [& lines]
+  (let [all-lines (->> lines
+                       (remove nil?)
+                       (flatten))]
+    (loop [lines (rest all-lines)
+           l [(first all-lines)]]
+      (if-let [line (first lines)]
+        (recur (rest lines)
+               (conj l (if (= line :break)
+                         (str "")
+                         (str "  " line))))
+        (apply str (interpose \newline l))))))
+
+(defn- make-docstring [docstring placeholders]
+  (reformat-docstring
+    (when docstring [docstring :break])
+    (when (seq placeholders)
+      [(str "Required arg" (when (> (count placeholders) 1) "s") ": "
+            (apply str (interpose ", " placeholders)))
+       :break])
+    "Arguments"
+    "---------"
+    "db must be a database spec or transaction, as defined by clojure.jdbc"
+    "args must be a map of required arguments for this query"
+    "opts may be a list of options to be passed to clojure.jdbc"))
+
+
 
 (defmacro create-query-in-ns [spec *ns*]
-  (let [{:keys [name docstring]} (:header spec)
-        args (quote ['db 'args '& 'opts])
-        base-args {:name     name
-                   :arglists `(list ~args)}
-        meta (merge base-args
-                    (when docstring
-                      {:doc docstring}))]
+  (let [{:keys [name docstring placeholders]} (:header spec)
+        args (quote ['db 'args? '& 'opts*])
+        meta {:name     name
+              :arglists `(list ~args)
+              :doc      (make-docstring docstring placeholders)}]
     `(intern ~*ns* (with-meta (symbol ~name) ~meta)
              (query-fn ~spec))))
 
