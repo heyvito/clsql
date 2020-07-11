@@ -55,7 +55,7 @@
              missing-keys# (seq (remove existing-keys# ~placeholders))]
          (throw-if missing-keys#
                    (apply str "Missing arg(s): "
-                          (interpose \, missing-keys#)))))))
+                          (interpose ", " missing-keys#)))))))
 
 (defn- pick-query-method [kind returns?]
   (if (or (= :select kind)

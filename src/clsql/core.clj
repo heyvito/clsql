@@ -58,9 +58,9 @@
               (apply str
                      (apply str "Could not find the following definition(s) in "
                             (symbol name) ": "
-                            (interpose \, unknown-refs))
+                            (interpose ", " unknown-refs))
                      (apply str "\nAvailable definition(s): "
-                            (interpose \, (doall (map get-name specs))))))
+                            (interpose ", " (doall (map get-name specs))))))
     (let [queries (map (fn [spec] `(codegen/create-query ~spec)) specs-to-load)]
       `(do ~@queries))))
 
