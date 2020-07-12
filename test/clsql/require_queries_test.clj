@@ -13,8 +13,13 @@
     (let [{:keys [name arglists doc]} (meta #'select-twenty-four)]
       (is (= (symbol 'select-twenty-four) name))
       (is (= 1 (count arglists)))
-      (is (= '[db args & opts] (first arglists)))
-      (is (= "This is a documentation block. It should be present in the function's documentation." doc)))))
+      (is (= '[db args? & opts*] (first arglists)))
+      (is (= doc (str "This is a documentation block. It should be present in the function's documentation.\n\n"
+                      "  Arguments\n"
+                      "  ---------\n"
+                      "  db must be a database spec or transaction, as defined by clojure.jdbc\n"
+                      "  args must be a map of required arguments for this query\n"
+                      "  opts may be a list of options to be passed to clojure.jdbc"))))))
 
 (deftest test-running
   (testing "execution with refer"

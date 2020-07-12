@@ -15,7 +15,7 @@
         (is (contains? header :placeholders))
         (is (vector? body))
         (is (every? vector? body))
-        (is (every? #(= 2 (count %)) body))))))
+        (is (every? #(>= (count %) 2) body))))))
 
 (deftest test-parser-complex
   (let [info (parse-queries "test/fixtures/queries/complex-query.sql")]
@@ -29,4 +29,4 @@
         (is (contains? header :placeholders))
         (is (vector? body))
         (is (every? vector? body))
-        (is (every? #(= 2 (count %)) body))))))
+        (is (every? #(>= (count %) 2) body))))))

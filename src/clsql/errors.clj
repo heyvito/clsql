@@ -1,7 +1,8 @@
 (ns clsql.errors
   (:require [instaparse.core :as insta]
             [instaparse.failure :as fail]
-            [instaparse.print :as print]))
+            [instaparse.print :as print])
+  (:import (java.util.regex Pattern)))
 
 (defn throw-if
   "Throws a CompilerException with a message if pred is true"
@@ -19,7 +20,7 @@
   (cond
     (:NOT r) (str "NOT " (:NOT r))
     (:char-range r) (print/char-range->str r)
-    (instance? java.util.regex.Pattern r) (print/regexp->str r)
+    (instance? Pattern r) (print/regexp->str r)
     :else (pr-str r)))
 
 (defn- format-failure [file failure]
@@ -35,15 +36,16 @@
                 (cond (zero? total) nil
                       (= 1 total) "Expected:"
                       :else "Expected one of:")]]
-    (interpose \newline
-               (-> result
-                   (conj (map #(str (format-reason %) " (followed by end-of-string)") full-reasons))
-                   (conj (map format-reason partial-reasons))
-                   (flatten)))))
+    (apply str
+           (interpose \newline
+                      (-> result
+                          (conj (map #(str (format-reason %) " (followed by end-of-string)") full-reasons))
+                          (conj (map format-reason partial-reasons))
+                          (flatten))))))
 
 (defn parse-or-die [file result]
   (when (insta/failure? result)
-    (throw (ex-info (apply str (format-failure file (insta/get-failure result)))
+    (throw (ex-info (format-failure file (insta/get-failure result))
                     {:source :clsql
                      :file   file})))
   result)
