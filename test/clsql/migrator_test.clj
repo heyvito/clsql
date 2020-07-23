@@ -3,10 +3,8 @@
             [clojure.java.io :as io]
             [clsql.migrator :refer :all]
             [clsql.config :as config]
-            [clsql.helpers :refer [delete-recursive
-                                   import-private-functions
+            [clsql.helpers :refer [import-private-functions
                                    database-config
-                                   databaseless-config
                                    tmp-dir
                                    isolating-database
                                    isolating-results

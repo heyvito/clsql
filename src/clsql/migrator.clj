@@ -4,7 +4,6 @@
             [clojure.string :as str]
             [clsql.config :as config]
             [clsql.grammars.migration :as migration]
-            [clsql.core :as core]
             [clojure.set :as set]
             [clsql.table-renderer :refer [render-table]])
   (:import (java.time Instant)
@@ -90,8 +89,8 @@
         version (:version mig)
         cmd (direction m)]
     (println (str "----------- 8< -----------\n\n"
-           (str/trim cmd)
-           "\n\n----------- 8< -----------\n\n"))
+                  (str/trim cmd)
+                  "\n\n----------- 8< -----------\n\n"))
     (sql/db-do-commands tx (split-commands cmd))
     (case direction
       :up (sql/insert! tx
@@ -107,7 +106,7 @@
   are executed within a transaction, allowing the database to revert any changes
   in case of an exception"
   []
-  (sql/with-db-transaction [tx (core/detect-database-config)]
+  (sql/with-db-transaction [tx (config/detect-database-config)]
     (let [has-run? (get-migrations tx)
           migrations (discover-migrations)]
       (when-let [to-apply (filter #(not (has-run? (:version %))) migrations)]
@@ -121,7 +120,7 @@
   "Reverts one or more migrations. When :to is defined, reverts all migrations
   after the provided version. Otherwise, reverts the last migration."
   [& {:keys [to]}]
-  (sql/with-db-transaction [tx (core/detect-database-config)]
+  (sql/with-db-transaction [tx (config/detect-database-config)]
     (let [executed-migrations (sort (get-migrations tx))
           local-migrations (discover-migrations)
           local-versions (set (map :version local-migrations))
@@ -144,7 +143,7 @@
   applied, down indicates it is pending. Question marks indicates the migration
   exists on the database, but a matching migration file could not be found."
   []
-  (sql/with-db-transaction [tx (core/detect-database-config)]
+  (sql/with-db-transaction [tx (config/detect-database-config)]
     (let [remote-migrations (set (get-migrations tx))
           all-local-migrations (discover-migrations)
           local-migrations (set (map :version all-local-migrations))

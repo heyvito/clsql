@@ -19,8 +19,8 @@
     (is (insta/failure? failure))
     (is (= (format-failure "test.sql" failure)
            (str "Error parsing test.sql at line 1 column 1:\n"
-           "This is clearly wrong.\n"
-           "^\n"
+                "This is clearly wrong.\n"
+                "^\n"
                 "Expected one of:\n"
                 "\"--\"\n"
                 "\"\\r\\n\"\n"

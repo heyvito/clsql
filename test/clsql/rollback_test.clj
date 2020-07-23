@@ -2,13 +2,9 @@
   (:require [clojure.test :refer :all]
             [clsql.migrator :refer :all]
             [clsql.config :as config]
-            [clsql.helpers :refer [delete-recursive
-                                   import-private-functions
+            [clsql.helpers :refer [import-private-functions
                                    database-config
-                                   databaseless-config
-                                   tmp-dir
                                    isolating-database
-                                   isolating-results
                                    isolating-config
                                    reset-database!]]
             [clojure.java.jdbc :as sql])
@@ -19,11 +15,6 @@
                                           get-migrations
                                           migrate-and-record])
 
-(def fixed-timestamp 1579891417)
-
-(defmacro mocking-time [& forms]
-  `(with-redefs-fn {#'clsql.migrator/get-timestamp (constantly ~fixed-timestamp)}
-     #(do ~@forms)))
 
 (deftest test-migrate-and-record
   (testing "executes commands and records it"

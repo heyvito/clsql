@@ -16,8 +16,7 @@ DSLs for such can make learning curves for new team members steeper, or
 introduce hard-to-find bugs. For those reasons, **clsql** was built.
 
 This library is heavily inspired by some of
-[yesql](https://github.com/krisajenkins/yesql) features. It was built as a
-side-project to train my (quite) rusty (E)BNF habilities.
+[yesql](https://github.com/krisajenkins/yesql) features.
 
 ## Installation
 
@@ -29,23 +28,23 @@ Add the following dependency to your `project.clj` file:
 
 ### Dependencies
 
-**clsql** does not provide abstrations to SQL. It simply parses files in a
-predetermined format, in a conventioned set of directories, and wraps contents
-and annotations of those files into Clojure functions. In order to access a
-database, you will need a **driver**:
+**clsql** does not provide abstractions to SQL. It simply parses files in a
+predetermined format, in a set of directories following a [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration) 
+approach, and wraps contents and annotations of those files into Clojure 
+functions. In order to access a database, you will need a **driver**:
 
 |  Database  | Driver                                       |
 |------------|----------------------------------------------|
 | PostgreSQL | `[org.postgresql/postgresql "42.2.12.jre7"]` |
 
-> **Notice**: Currently, I have only tested this library with PostgreSQL. In
-case you use another database, feel free to test it and open a pull request to
+> **Notice**: Currently, this library has been tested exclusively with PostgreSQL. 
+In case you use another RDBMS, feel free to test it and open a pull request to
 update this table.
 
 
 ## Usage
 
-As mentioned previouly, `clsql` handles both migrations and queries. Developers
+As mentioned previously, `clsql` handles both migrations and queries. Developers
 are free to use only a single facility, or both of them.
 
 ### Initial configuration
@@ -123,15 +122,15 @@ DROP TABLE users;
 
 #### Migration safety
 Migrations are executed within a transaction. This way, in case anything goes
-wrong, all changes are automatically reverted.
+wrong, all changes will be automatically reverted.
 
 > **WARNING**: Not every RDBMS accepts schema modifications within transactions.
 
 ### Queries
 
-Queries are defined in plain SQL files. Each file may contain an arbitrary number
+Plain SQL files defines queries where each file may contain an arbitrary number
 of queries. Each query must contain at least a name, but can also include
-additional information, such as a docstring, and modifiers.
+additional information, such as a documentation, and modifiers.
 
 #### Defining queries
 
@@ -144,9 +143,10 @@ new query by prefixing it with a name:
 --> active-users
 ```
 
-Names are indicated by the prefix `-->`, followed by how one wants to reference
-the query on Clojure's side. In the example above, we're creating an
-`active-users` query. Let's add some documentation to it:
+Names must be indicated by the `-->` prefix, followed by how one wants to 
+reference the query on Clojure's side. In the example above, an `active-users` 
+query will be defined. After adding documentation, the same query can be 
+represented by the following snippet:
 
 ```sql
 --> active-users
@@ -154,7 +154,7 @@ the query on Clojure's side. In the example above, we're creating an
 -- Users are marked as active after confirming their email addresses.
 ```
 
-The code above will allow the library to automatically include documentation
+The code above allows the library to automatically include documentation
 to generated functions, making them available through [`doc`](https://clojuredocs.org/clojure.repl/doc).
 
 Then, write your SQL as you would:
@@ -180,7 +180,7 @@ After configuring and defining your SQL, simply import it by using
 (require-query users :refer [active-users])
 
 (defn list-active-users []
-    (active-users db-spec nil))
+    (active-users))
 ```
 
 The result will be a list of maps of all returned results.
@@ -191,7 +191,7 @@ In the REPL, documentation can be also accessed:
 => (doc active-users)
 -------------------------
 myapplication.some-namespace/active-users
-([db args & opts])
+([& args*])
   Returns all users marked as active. Users are marked as active after
   confirming their email addresses.
 ```

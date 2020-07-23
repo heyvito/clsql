@@ -24,3 +24,6 @@
   (testing "invalid key"
     (let [ast [:test 1]]
       (is (thrown? ExceptionInfo (extract-from-ast :foo ast))))))
+
+(deftest test-parsing-failure
+  (is (thrown? ExceptionInfo (parse-migration "test/fixtures/invalid-sql-file.sql"))))
