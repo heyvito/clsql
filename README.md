@@ -23,21 +23,21 @@ This library is heavily inspired by some of
 Add the following dependency to your `project.clj` file:
 
 ```clojure
-[clsql "0.2.0"]
+[clsql "0.3.0"]
 ```
 
 ### Dependencies
 
 **clsql** does not provide abstractions to SQL. It simply parses files in a
-predetermined format, in a set of directories following a [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration) 
-approach, and wraps contents and annotations of those files into Clojure 
+predetermined format, in a set of directories following a [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration)
+approach, and wraps contents and annotations of those files into Clojure
 functions. In order to access a database, you will need a **driver**:
 
 |  Database  | Driver                                       |
 |------------|----------------------------------------------|
 | PostgreSQL | `[org.postgresql/postgresql "42.2.12.jre7"]` |
 
-> **Notice**: Currently, this library has been tested exclusively with PostgreSQL. 
+> **Notice**: Currently, this library has been tested exclusively with PostgreSQL.
 In case you use another RDBMS, feel free to test it and open a pull request to
 update this table.
 
@@ -52,11 +52,15 @@ Library defaults can be changed by changing
 [`atom`](https://clojure.org/reference/atoms)s defined by the `clsql.config`
 namespace:
 
-| Atom                     | Required By | Description   |
-|--------------------------|-------------|---------------|
-| `migrations-directory`   | Migrations  | Indicates the directory in which the library will look for migration files. Defaults to `"resources/db/migrations"` |
-| `database-configuration` | Migrations  | Defines configurations used by the migration facility to connect to the target database server. More information is available in the [Migrations](#migrations) section. |
-| `queries-directory`      | Querying    | Indicates the directory in which the library will look for query files. Defaults to `"resources/db/queries"`|
+| Atom                     | Required By         | Description   |
+|--------------------------|---------------------|---------------|
+| `migrations-directory`   | Migrations          | Indicates the directory in which the library will look for migration files. Defaults to `"resources/db/migrations"` |
+| `queries-directory`      | Querying            | Indicates the directory in which the library will look for query files. Defaults to `"resources/db/queries"`|
+| `database-configuration` | Migrations/Querying | Defines configurations to connect to the target database server. |
+
+`database-configuration` is required by both facilities. It is required for
+querying if you intend to use the simpler, non-star query functions. For further
+information, refer to [Passing Extra Options](#Passing-Extra-Options)
 
 ### Migrations
 In order to use any feature provided by the Migrations facility, your
@@ -143,9 +147,9 @@ new query by prefixing it with a name:
 --> active-users
 ```
 
-Names must be indicated by the `-->` prefix, followed by how one wants to 
-reference the query on Clojure's side. In the example above, an `active-users` 
-query will be defined. After adding documentation, the same query can be 
+Names must be indicated by the `-->` prefix, followed by how one wants to
+reference the query on Clojure's side. In the example above, an `active-users`
+query will be defined. After adding documentation, the same query can be
 represented by the following snippet:
 
 ```sql
@@ -194,6 +198,11 @@ myapplication.some-namespace/active-users
 ([& args*])
   Returns all users marked as active. Users are marked as active after
   confirming their email addresses.
+
+  Arguments
+  ---------
+  args must be a list of keyword-value containing required arguments
+  to execute this function.
 ```
 
 #### Queries with placeholders
@@ -225,7 +234,7 @@ import it and see what happens:
 Now, let's try to invoke it without arguments and see how it behaves:
 
 ```clojure
-=> (users/activated-after db nil)
+=> (users/activated-after)
 Execution error (IllegalArgumentException) at ...
 Missing parameter(s): :date
 ```
@@ -235,14 +244,56 @@ the invocation. Thus, an `IllegalArgumentException` was thrown. To fix it, let's
 provide what it needs:
 
 ```clojure
-=> (users/activated-after db {:date "2020-01-24"})
+=> (users/activated-after :date "2020-01-24")
 ...
 ```
 
-> **ProTip™**: Wondering what `db` is in all those calls? Wonder no more! `db`
-is just a db-spec structure just like one would use with
-[`clojure.java.jdbc`](https://github.com/clojure/java.jdbc). It can also be a
-transaction, obtained from [`with-db-transaction`](http://clojure-doc.org/articles/ecosystem/java_jdbc/using_sql.html#using-transactions).
+### Passing Extra Options
+Each query function exists in two forms, a simpler one, which takes either an
+even number of arguments forming a map or none at all, and another one, with a
+star (`*`) suffix, that take extra params. For instance, let's see documentation
+for both versions of our `activated-after` function:
+
+```clojure
+=> (doc users/activated-after)
+-------------------------
+myapplication.some-namespace/activated-after
+([& args*])
+  Returns all users activated after a given date.
+
+  Required arg: :date
+
+  Arguments
+  ---------
+  args must be a list of keyword-value containing required arguments
+  to execute this function.
+
+
+=> (doc users/activated-after*)
+-------------------------
+myapplication.some-namespace/activated-after*
+([db args? & opts*])
+  Returns all users activated after a given date.
+
+  Required arg: :date
+
+  Arguments
+  ---------
+  db must be a database spec or transaction, as defined by clojure.jdbc
+  args must be a map of required arguments for this query, or nil
+  opts may be a list of options to be passed to clojure.jdbc
+```
+
+One can note major differences between those functions by only analysing their
+arguments; The simpler one wants an arbitrary number of arguments, whilst the
+second one wants a `db`, `args` and `opts`. While one may almost always use
+the non-star function, the second may come handy in case a different database
+than the one defined by `database-configuration` needs to be accessed.
+`db` must be a db-spec structure just like one would use with
+[`clojure.java.jdbc`](https://github.com/clojure/java.jdbc). It can
+alternativelly be a transaction, obtained from
+[`with-db-transaction`](http://clojure-doc.org/articles/ecosystem/java_jdbc/using_sql.html#using-transactions).
+
 
 ## Contributions
 ...are more than welcome! <br/>
