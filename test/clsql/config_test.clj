@@ -1,15 +1,13 @@
-(ns clsql.core-test
+(ns clsql.config-test
   (:require [clojure.test :refer :all]
-            [clsql.core :refer :all]
-            [clsql.helpers :refer :all]
-            [clsql.config :as config])
+            [clsql.config :refer :all]
+            [clsql.helpers :refer :all])
   (:import (clojure.lang ExceptionInfo)))
 
-
-(import-private-functions clsql.core [keywordize
-                                      normalize-database-uri
-                                      find-env-keys
-                                      get-env])
+(import-private-functions clsql.config [keywordize
+                                        normalize-database-uri
+                                        find-env-keys
+                                        get-env])
 
 (deftest test-keywordize
   (is (= :this-is-a-test (keywordize "this_is_a_test"))))
@@ -30,12 +28,12 @@
   (is (= (get-env) (System/getenv))))
 
 (defmacro with-envs [data & forms]
-  `(with-redefs-fn {#'clsql.core/get-env (constantly ~data)}
+  `(with-redefs-fn {#'clsql.config/get-env (constantly ~data)}
      #(do ~@forms)))
 
 (defn reset-config!
   ([] (reset-config! nil))
-  ([v] (reset! config/database-configuration v)))
+  ([v] (reset! database-configuration v)))
 
 (deftest test-find-env-keys
   (testing "with keys"

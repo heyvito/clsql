@@ -3,41 +3,11 @@
             [clsql.errors :refer [throw-if]]
             [clsql.grammars.queries :as queries]
             [clsql.codegen :as codegen]
+            [clsql.quoting :as quoting]
+            [clsql.instrumentation :as instrumentation]
             [clojure.string :as str]
             [clojure.java.io :as io]
             [clojure.set :refer [difference]]))
-
-(defn- get-env []
-  (System/getenv))
-
-(defn- keywordize [k]
-  (keyword (str/replace k #"_" "-")))
-
-(defn- normalize-database-uri [coll]
-  (if-let [uri (:connection-uri coll)]
-    (assoc coll :connection-uri
-                (str (when-not (str/starts-with? uri "jdbc:") "jdbc:") uri))
-    coll))
-
-(defn- find-env-keys []
-  (let [vals (->> (get-env)
-                  (map (fn [[k v]] [(str/lower-case k) v]))
-                  (filter (fn [[k _]] (str/starts-with? k "clsql")))
-                  (map (fn [[k v]] [(str/replace k #"clsql_" "") v]))
-                  (map (fn [[k v]] [(keywordize k) v]))
-                  (into {}))]
-    (if (empty? vals) nil
-                      (normalize-database-uri vals))))
-
-(defn detect-database-config []
-  (or @config/database-configuration
-      (reset! config/database-configuration (find-env-keys))))
-
-(defn detect-database-config! []
-  (or (detect-database-config)
-      (throw (ex-info "clsql: Can't find database configuration"
-                      {:error   "No database configuration"
-                       :details "https://github.com/heyvito/clsql/wiki/errors"}))))
 
 (defn- read-queries [name]
   (let [final-name (str name
@@ -137,3 +107,25 @@
   (let [requires (map (fn [param]
                         `(require-query ~@param)) params)]
     `(do ~@requires)))
+
+(defn register-custom-formatter
+  "Registers a new custom formatter using either a class or predicate fn.
+  A predicate fn must accept a single argument, and return whether the provided
+  formatting-fn will be able to format the given value. When pred returns true,
+  formatting-fn will be called with the same val provided to the predicate.
+  Both predicate and formatting-fn must be free of side effects.
+
+  This is exclusively used by instrumentation facilities and do not change how
+  SQL is sent to the target RDBMS."
+  [class-or-pred formatting-fn]
+  (if (class? class-or-pred)
+    (let [pred #(instance? class-or-pred %)]
+      (swap! quoting/custom-fn-formatter conj [pred formatting-fn]))
+    (swap! quoting/custom-fn-formatter conj [class-or-pred formatting-fn])))
+
+(defn set-instrumentation-handler
+  "Sets a given fn as the instrumentation handler responsible for receiving
+  instrumentation events. fn must accept a single argument containing a map
+  with metadata about instrumentation events."
+  [fn]
+  (reset! instrumentation/handler fn))

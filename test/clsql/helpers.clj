@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clsql.config :as config]
+            [clsql.instrumentation :as instrumentation]
             [clojure.java.jdbc :as sql])
   (:import (java.io File)))
 
@@ -60,3 +61,21 @@
      ~@forms
      (finally
        ~fn)))
+
+(defmacro with-database-config [database-config & forms]
+  `(let [old-c# @config/database-configuration]
+     (reset! config/database-configuration database-config)
+     (try
+       ~@forms
+       (finally
+         (reset! config/database-configuration old-c#)))))
+
+(defmacro with-databaseless-config [& forms]
+  `(with-database-config databaseless-config ~@forms))
+
+(defmacro instrumenting-with [fn & forms]
+  `(let [old-handler# @instrumentation/handler]
+     (reset! instrumentation/handler ~fn)
+     (try
+       ~@forms
+       (finally (reset! instrumentation/handler old-handler#)))))
